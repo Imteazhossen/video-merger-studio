@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Video Merger Studio — merge, reorder &amp; upscale videos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- SVG icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 001 1h8a1 1 0 001-1l1-12M9 7V4h6v3"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4-4m4 4l4-4"/><path d="M4 18v1a1 1 0 001 1h14a1 1 0 001-1v-1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+    <symbol id="i-sort" viewBox="0 0 24 24"><path d="M4 7h10M4 12h7M4 17h4M17 5v14m0 0l-3-3m3 3l3-3"/></symbol>
+    <symbol id="i-reverse" viewBox="0 0 24 24"><path d="M7 4v16m0 0l-3-3m3 3l3-3M17 20V4m0 0l-3 3m3-3l3 3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18.2v.1"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#" aria-label="Video Merger Studio">
+      <span class="brand__logo"><svg class="icon"><use href="#i-film"/></svg></span>
+      <span class="brand__text"><strong>Video Merger</strong> Studio</span>
+    </a>
+    <div class="topbar__actions">
+      <span id="enginePill" class="pill pill--loading" role="status" aria-live="polite">
+        <span class="pill__dot"></span><span id="engineText">Loading engine…</span>
+      </span>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon"><use id="themeIcon" href="#i-moon"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ===================== LEFT: workspace ===================== -->
+  <section class="workspace" aria-label="Workspace">
+
+    <div id="resultPanel" class="panel result" hidden>
+      <div class="panel__head">
+        <h2><svg class="icon icon--ok"><use href="#i-check"/></svg> Your merged video is ready</h2>
+        <button id="resultClose" class="icon-btn" type="button" aria-label="Dismiss"><svg class="icon"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="result__body">
+        <video id="resultVideo" controls playsinline></video>
+        <div class="result__side">
+          <dl id="resultStats" class="stats"></dl>
+          <label class="field">
+            <span class="field__label">File name</span>
+            <input id="fileName" class="input" type="text" value="merged-video" spellcheck="false">
+          </label>
+          <a id="downloadBtn" class="btn btn--primary btn--lg" href="#" download="merged-video.mp4">
+            <svg class="icon"><use href="#i-download"/></svg> Download MP4
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Add videos">
+      <div class="dropzone__icon"><svg class="icon"><use href="#i-upload"/></svg></div>
+      <div class="dropzone__text">
+        <h2>Drop your videos here</h2>
+        <p>MP4, MOV, MKV, AVI, WMV, WEBM, <strong>VOB</strong>, <strong>DAT</strong> and more — add as many as you like.</p>
+      </div>
+      <label class="btn btn--primary" for="filePicker"><svg class="icon"><use href="#i-plus"/></svg> Browse files</label>
+      <input id="filePicker" type="file" multiple accept="video/*,.vob,.dat,.mkv,.avi,.wmv,.flv,.mpg,.mpeg,.ts,.mts,.m2ts,.3gp,.mov,.m4v,.webm,.mp4" hidden>
+    </div>
+
+    <div class="panel timeline">
+      <div class="panel__head">
+        <div>
+          <h2>Timeline</h2>
+          <p id="summary" class="muted">No clips yet</p>
+        </div>
+        <div class="toolbar" id="toolbar">
+          <button id="sortBtn" class="btn btn--ghost btn--sm" type="button" title="Sort A→Z (natural order)"><svg class="icon"><use href="#i-sort"/></svg> Sort by name</button>
+          <button id="reverseBtn" class="btn btn--ghost btn--sm" type="button" title="Reverse order"><svg class="icon"><use href="#i-reverse"/></svg> Reverse</button>
+          <button id="clearBtn" class="btn btn--ghost btn--sm btn--danger" type="button"><svg class="icon"><use href="#i-trash"/></svg> Clear all</button>
+        </div>
+      </div>
+
+      <ol id="clipList" class="clip-list" aria-label="Video clips in merge order"></ol>
+
+      <div id="emptyState" class="empty">
+        <svg class="icon icon--xl"><use href="#i-film"/></svg>
+        <p>Your clips will appear here.<br>Drag them (or type a number) to set the order they play in.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RIGHT: settings & export ===================== -->
+  <aside class="sidebar" aria-label="Output settings">
+    <div class="panel settings">
+      <div class="panel__head"><h2>Output settings</h2></div>
+
+      <div class="grid-2">
+        <label class="field">
+          <span class="field__label">Resolution</span>
+          <select id="resolution" class="input">
+            <option value="auto">Auto (best)</option>
+            <option value="720">HD 720p</option>
+            <option value="1080">FHD 1080p</option>
+            <option value="1440">2K 1440p</option>
+            <option value="2160">4K 2160p</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Aspect ratio</span>
+          <select id="aspect" class="input">
+            <option value="auto">Auto</option>
+            <option value="16:9">16:9 Landscape</option>
+            <option value="9:16">9:16 Portrait</option>
+            <option value="1:1">1:1 Square</option>
+            <option value="4:3">4:3 Classic</option>
+            <option value="21:9">21:9 Cinema</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="field">
+        <span class="field__label">When a clip doesn't fit</span>
+        <div class="segmented" id="fitSeg" role="radiogroup" aria-label="Fit mode">
+          <button type="button" role="radio" data-fit="letterbox">Black bars</button>
+          <button type="button" role="radio" data-fit="blur">Blur fill</button>
+          <button type="button" role="radio" data-fit="crop">Crop</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <label class="field">
+          <span class="field__label">Frame rate</span>
+          <select id="fps" class="input">
+            <option value="auto">Auto</option>
+            <option value="24">24 fps</option>
+            <option value="25">25 fps</option>
+            <option value="30">30 fps</option>
+            <option value="50">50 fps</option>
+            <option value="60">60 fps</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Quality</span>
+          <select id="crf" class="input">
+            <option value="20">Best (large file)</option>
+            <option value="23">High</option>
+            <option value="26">Balanced</option>
+            <option value="30">Small file</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="field__label">Speed vs. size</span>
+        <select id="preset" class="input">
+          <option value="ultrafast">Fastest</option>
+          <option value="superfast">Very fast</option>
+          <option value="veryfast">Fast (recommended)</option>
+          <option value="medium">Slow (smaller file)</option>
+        </select>
+      </label>
+
+      <div class="switches">
+        <label class="switch"><input id="sharpen" type="checkbox"><span class="switch__ui"></span><span class="switch__text"><strong>Enhance sharpness</strong><small>Crisper picture when upscaling</small></span></label>
+        <label class="switch"><input id="deinterlace" type="checkbox"><span class="switch__ui"></span><span class="switch__text"><strong>Deinterlace</strong><small>Fixes comb lines in DVD / VOB</small></span></label>
+        <label class="switch"><input id="normalize" type="checkbox"><span class="switch__ui"></span><span class="switch__text"><strong>Even out volume</strong><small>Same loudness for every clip</small></span></label>
+      </div>
+
+      <div id="planBox" class="plan">
+        <svg class="icon"><use href="#i-bolt"/></svg>
+        <div><strong id="planMain">Output: —</strong><small id="planHint"></small></div>
+      </div>
+    </div>
+
+    <div class="panel export">
+      <button id="mergeBtn" class="btn btn--primary btn--xl" type="button" disabled>
+        <svg class="icon"><use href="#i-film"/></svg> <span id="mergeLabel">Merge videos</span>
+      </button>
+      <p id="mergeHint" class="muted center">Add at least 2 clips to start.</p>
+
+      <div id="progressBox" class="progress" hidden>
+        <div class="progress__top"><strong id="progressText">Starting…</strong><span id="progressPct">0%</span></div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="barFill"></div></div>
+        <div class="progress__meta"><span id="elapsed">Elapsed 0:00</span><span id="eta"></span></div>
+        <button id="cancelBtn" class="btn btn--ghost btn--sm btn--danger" type="button">Cancel</button>
+      </div>
+
+      <div id="errorBox" class="alert" hidden>
+        <svg class="icon"><use href="#i-alert"/></svg>
+        <div>
+          <strong id="errorTitle">Something went wrong</strong>
+          <p id="errorMsg"></p>
+          <details><summary>Technical log</summary><pre id="errorLog"></pre></details>
+        </div>
+      </div>
+    </div>
+
+    <p class="foot muted">Everything runs in your browser. Your videos never leave this computer. Best in Chrome, Edge or Brave on a desktop.</p>
+  </aside>
+</main>
+
+<div id="dropOverlay" class="drop-overlay" hidden><div><svg class="icon icon--xl"><use href="#i-upload"/></svg><h2>Drop to add videos</h2></div></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<dialog id="previewDialog" class="dialog">
+  <div class="dialog__head"><strong id="previewTitle"></strong><button id="previewClose" class="icon-btn" type="button" aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button></div>
+  <video id="previewVideo" controls playsinline></video>
+</dialog>
+
+<!-- App scripts (connected with script tags) -->
+<script src="engine/ffmpeg.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+<!-- Engine data files (large, loaded last, async) -->
+<script async src="engine/worker.js"></script>
+<script async src="engine/core.js"></script>
+<script async src="engine/wasm.js"></script>
+</body>
+</html>
